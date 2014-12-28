@@ -6,6 +6,7 @@
             [image-resizer.resize :refer :all]
             [image-resizer.format :as format]
             [image-resizer.core :refer :all]
+            [image-resizer.scale-methods :refer :all]
             [image-resizer.util :refer [buffered-image]]))
 
 (defmacro dlet [bindings & body]
@@ -23,6 +24,9 @@
            mystring (take n (repeatedly #(rand-nth chars)))]
        (reduce str mystring))))
 
+(defn ultra-resize [image width height]
+  ((resize-fn width height ultra-quality) image))
+
 (defn nix-resize [new-width new-height]
   "Resize a photo to new width, then with equal
   crops from top and bottom to specified height,
@@ -34,7 +38,7 @@
           vertical-pad (int (/ (- crop-height new-height) 2))]
           (format/as-file
            (crop-from
-            (resize image new-width crop-height) 0 vertical-pad new-width new-height)
+            (ultra-resize image new-width crop-height) 0 vertical-pad new-width new-height)
            (str "/Users/hall/Desktop/Nix/kev-resize/o/" (fixed-length-string) ".jpg" ))
           (println "Wrote File...."))))
 
@@ -42,8 +46,6 @@
 
 (defn -main [& args]
   (let [names-vector (vec args)
-        _ (println names-vector)
-        files-vector (map file names-vector)
-        _ (println files-vector)]
+        files-vector (map file names-vector)]
     (doall
      (clojure.core/pmap nix-make-image files-vector))))
